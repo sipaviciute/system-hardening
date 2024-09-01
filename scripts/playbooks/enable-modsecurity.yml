@@ -1,0 +1,8 @@
+---
+- name: Enable modsecurity
+  hosts: webservers
+  become: true
+  vars_files:
+    - ../defaults/encrypted_vault.yml
+  roles:
+    - enable_modsecurity

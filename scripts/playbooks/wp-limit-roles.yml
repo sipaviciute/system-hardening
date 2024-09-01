@@ -1,0 +1,8 @@
+---
+- name: Change WordPress User Roles
+  hosts: webservers
+  become: true
+  vars_files:
+    - ../defaults/encrypted_vault.yml
+  roles:
+    - wp_limit_roles

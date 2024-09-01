@@ -1,0 +1,36 @@
+---
+- name: Install gnupg
+  ansible.builtin.apt:
+    name: gnupg
+    state: present
+    update_cache: true  # Update the cache before installing
+
+- name: Add the MySQL Repository Key
+  ansible.builtin.apt_key:
+    keyserver: keyserver.ubuntu.com
+    id: B7B3B788A8D3785C
+
+- name: Download MySQL APT config package
+  ansible.builtin.get_url:
+    url: https://repo.mysql.com//mysql-apt-config_0.8.19-1_all.deb
+    dest: "/tmp/mysql-apt-config_0.8.19-1_all.deb"
+    mode: '0644'
+
+- name: Install MySQL APT config package
+  ansible.builtin.apt:
+    deb: "/tmp/mysql-apt-config_0.8.19-1_all.deb"
+
+- name: Update all APT packages
+  ansible.builtin.apt:
+    update_cache: true
+
+- name: Upgrade MySQL Community Server
+  ansible.builtin.apt:
+    name: mysql-community-server
+    state: latest
+
+- name: Check MySQL Service Status
+  ansible.builtin.systemd:
+    name: mysql
+    state: started
+    enabled: true

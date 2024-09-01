@@ -1,0 +1,8 @@
+---
+- name: Secure distribution
+  hosts: all
+  become: true
+  vars_files:
+    - ../defaults/encrypted_vault.yml
+  roles:
+    - secure_distro

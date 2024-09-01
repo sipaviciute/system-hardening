@@ -1,0 +1,22 @@
+---
+- name: Insert settings for XMLRPC and allowed methods
+  ansible.builtin.lineinfile:
+    path: /etc/nginx/sites-available/main.conf
+    insertbefore: "^}"
+    line: |
+      if ($request_method !~ ^(GET|POST)$ ) {
+        return 405;
+      }
+        
+      location = /xmlrpc.php {
+        deny all;
+      }
+    state: present
+
+- name: Disable server tokens in nginx configuration
+  ansible.builtin.lineinfile:
+    path: /etc/nginx/conf/nginx.conf
+    insertbefore: '^    include       mime.types;'
+    line: '    server_tokens off;'
+    state: present
+  notify: Restart nginx

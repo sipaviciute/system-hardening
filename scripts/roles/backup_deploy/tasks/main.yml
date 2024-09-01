@@ -1,0 +1,46 @@
+---
+- name: Install rsync
+  ansible.builtin.apt:
+    name: rsync
+
+- name: Create MySQL configuration file
+  ansible.builtin.template:
+    src: my.cnf.j2
+    dest: "/home/adsi8893/.my.cnf"
+    owner: adsi8893
+    group: adsi8893
+    mode: '0600'
+  when: "'database' in inventory_hostname"
+
+- name: Ensure backup directory exists
+  ansible.builtin.file:
+    path: "/home/moce9946/backups/"
+    state: directory
+    owner: moce9946
+    group: moce9946
+    mode: '0755'
+  when: "'backup' in inventory_hostname"
+
+- name: Transfer the MySQL backup script (Jinja template)
+  ansible.builtin.template:
+    src: backup.sh.j2
+    dest: /opt/backup.sh
+    mode: '0750'
+    owner: root
+    group: root
+
+- name: Setup cron job for MySQL backups
+  ansible.builtin.cron:
+    name: "Backup MySQL database"
+    job: /opt/backup.sh
+    minute: "0"
+    hour: "8"
+    day: "1"
+    month: "*"
+    weekday: "*"
+    user: root
+    state: present
+
+- name: Run the MySQL backup script immediately
+  ansible.builtin.shell: /opt/backup.sh
+  when: "'database' in inventory_hostname or 'webserver' in inventory_hostname"

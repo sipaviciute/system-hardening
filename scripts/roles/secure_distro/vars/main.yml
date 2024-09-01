@@ -1,0 +1,2 @@
+---
+users_to_remove: ['sudoUser1', 'sudoUser2', 'sudoUser3']

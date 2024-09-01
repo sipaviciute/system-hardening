@@ -1,0 +1,11 @@
+- name: Change role of author to contributor
+  ansible.builtin.command: sudo -u www-data wp user set-role author subscriber --path=/var/www/html
+
+- name: Change role of contributor to subscribers
+  ansible.builtin.command: sudo -u www-data wp user set-role contributor subscriber --path=/var/www/html
+
+- name: Change role of editor to contributor
+  ansible.builtin.command: sudo -u www-data wp user set-role editor subscriber --path=/var/www/html
+
+- name: Change role of editor2 to contributor
+  ansible.builtin.command: sudo -u www-data wp user set-role editor2 subscriber --path=/var/www/html

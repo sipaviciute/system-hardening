@@ -1,0 +1,8 @@
+---
+- name: Update database
+  hosts: databases
+  become: true
+  vars_files:
+    - ../defaults/encrypted_vault.yml
+  roles:
+    - update_database

@@ -1,0 +1,5 @@
+- name: Disable file edit in the user permissions dashboard
+  ansible.builtin.lineinfile:
+    path: /var/www/html/wp-config.php
+    line: define('DISALLOW_FILE_EDIT', true);
+    insertafter: EOF

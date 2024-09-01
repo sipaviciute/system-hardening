@@ -1,0 +1,9 @@
+---
+- name: Install and activate WPS Hide Login Plugin using WP-CLI
+  ansible.builtin.command: "sudo -u www-data wp --path=/var/www/html plugin install wps-hide-login --activate"
+
+- name: Set custom admin URL
+  ansible.builtin.command: "sudo -u www-data wp --path=/var/www/html option add whl_page 'dont-login'"
+
+- name: Install and activate Limit Login Attempts Reloaded Plugin using WP-CLI
+  ansible.builtin.command: "sudo -u www-data wp --path=/var/www/html plugin install limit-login-attempts-reloaded --activate"

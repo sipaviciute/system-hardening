@@ -1,0 +1,22 @@
+BACKUP_HOST="10.1.0.24"
+BACKUP_HOST_USER="moce9946"
+BACKUP_HOST_PATH="/home/moce9946/backups/"
+BACKUP_PATH="/tmp/"
+{% if 'databases' in group_names %}
+MYSQL_USER="{{ mysql_user }}"
+MYSQL_PASSWORD="{{ mysql_password }}"
+MYSQL_DATABASE="wordpress"
+
+mysqldump --defaults-file=/home/adsi8893/.my.cnf -u $MYSQL_USER $MYSQL_DATABASE > $BACKUP_PATH/${MYSQL_DATABASE}-database_$(date +%Y%m%d).sql
+
+sudo -u adsi8893 rsync -az $BACKUP_PATH/${MYSQL_DATABASE}-database_$(date +%Y%m%d).sql $BACKUP_HOST_USER@$BACKUP_HOST:$BACKUP_HOST_PATH
+
+{% elif 'webservers' in group_names %}
+WEB_PATH="/var/www/html"
+
+
+zip -r $BACKUP_PATH/wordpress_backup_$(date +%Y%m%d).zip $WEB_PATH
+
+sudo -u adsi8893 rsync -az $BACKUP_PATH/wordpress_backup_$(date +%Y%m%d).zip $BACKUP_HOST_USER@$BACKUP_HOST:$BACKUP_HOST_PATH
+
+{% endif %}

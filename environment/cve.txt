@@ -1,0 +1,9 @@
+https://www.wordfence.com/threat-intel/vulnerabilities/wordpress-plugins/interact-quiz-embed/interact-embed-a-quiz-on-your-site-307-authenticated-contributor-stored-cross-site-scripting-via-shortcode
+
+https://www.wordfence.com/threat-intel/vulnerabilities/wordpress-plugins/iframe/iframe-46-authenticated-contributor-stored-cross-site-scripting-via-iframe-shortcode
+
+https://www.wordfence.com/threat-intel/vulnerabilities/wordpress-plugins/blog-filter/blog-filter-153-authenticated-contributor-stored-cross-site-scripting-via-shortcode
+
+https://www.wordfence.com/threat-intel/vulnerabilities/wordpress-plugins/delete-me/delete-me-30-authenticated-contributor-stored-cross-site-scripting-via-shortcode
+
+https://www.wordfence.com/threat-intel/vulnerabilities/wordpress-plugins/bellows-accordion-menu/bellows-accordion-menu-142-authenticated-contributor-stored-cross-site-scripting-via-shortcode

@@ -1,0 +1,8 @@
+---
+- name: Wordpress login hardening
+  hosts: webservers
+  become: true
+  vars_files:
+    - ../defaults/encrypted_vault.yml
+  roles:
+    - wp_login_hardening

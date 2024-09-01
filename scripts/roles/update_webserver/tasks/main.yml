@@ -1,0 +1,124 @@
+---
+- name: Install required packages for PHP and Nginx
+  ansible.builtin.apt:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - rsync
+    - lsb-release
+    - ca-certificates
+    - apt-transport-https
+    - software-properties-common
+    - php-mysql
+
+- name: Download and install Nginx from source
+  block:
+    - name: Stop Nginx service
+      ansible.builtin.systemd:
+        name: nginx
+        state: stopped
+
+    - name: Download Nginx source
+      ansible.builtin.get_url:
+        url: https://nginx.org/download/nginx-1.26.0.tar.gz
+        dest: /etc/nginx/nginx-1.26.0.tar.gz
+        mode: '0644'
+
+    - name: Extract Nginx source
+      ansible.builtin.unarchive:
+        src: /etc/nginx/nginx-1.26.0.tar.gz
+        dest: /etc/nginx/
+        remote_src: true
+        creates: /etc/nginx/nginx-1.26.0
+
+    - name: Compile and install Nginx
+      ansible.builtin.shell: |
+        cd /etc/nginx/nginx-1.26.0
+        ./configure --prefix=/etc/nginx
+        make
+        make install
+      args:
+        chdir: /etc/nginx/nginx-1.26.0
+
+    - name: Start Nginx service
+      ansible.builtin.systemd:
+        name: nginx
+        state: started
+        enabled: true
+
+- name: Update PHP version and restart services
+  block:
+    - name: Add PHP GPG key
+      ansible.builtin.apt_key:
+        url: https://packages.sury.org/php/apt.gpg
+        state: present
+
+    - name: Add PHP repository
+      ansible.builtin.apt_repository:
+        repo: "deb https://packages.sury.org/php/ {{ ansible_distribution_release }} main"
+        state: present
+
+    - name: Upgrade PHP to specified version and install PHP-FPM
+      ansible.builtin.apt:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - php8.3
+        - php8.3-fpm
+
+    - name: Update nginx configuration for new PHP-FPM
+      ansible.builtin.lineinfile:
+        path: /etc/nginx/conf/nginx.conf
+        regexp: 'fastcgi_pass unix:/var/run/php/php7.4-fpm.sock;'
+        line: 'fastcgi_pass unix:/var/run/php/php8.3-fpm.sock;'
+
+    - name: Restart Nginx to apply PHP configuration
+      ansible.builtin.systemd:
+        name: nginx
+        state: restarted
+
+- name: Update WordPress and plugins
+  block:
+    - name: Download the latest WordPress
+      ansible.builtin.get_url:
+        url: https://wordpress.org/latest.tar.gz
+        dest: /tmp/latest.tar.gz
+        mode: '0644'
+
+    - name: Extract WordPress archive
+      ansible.builtin.unarchive:
+        src: /tmp/latest.tar.gz
+        dest: /tmp/
+        remote_src: true
+
+    - name: Rsync WordPress files excluding config and content
+      ansible.builtin.shell:
+        cmd: rsync -avP /tmp/wordpress/ /var/www/html/ --exclude=wp-config.php --exclude=wp-content
+      args:
+        executable: /bin/bash
+
+    - name: Set ownership for /var/www/html
+      ansible.builtin.file:
+        path: /var/www/html
+        owner: www-data
+        group: www-data
+        recurse: true
+        state: directory
+
+    - name: Change permissions for directories
+      ansible.builtin.command: sudo find /var/www/html -type d -exec chmod 755 {} \;
+
+    - name: Change permissions for files
+      ansible.builtin.command: sudo find /var/www/html -type f -exec chmod 644 {} \;
+
+    - name: Update WordPress database
+      ansible.builtin.shell:
+        cmd: sudo -u www-data wp core update-db --path=/var/www/html
+        executable: /bin/bash
+        chdir: /var/www/html
+
+    - name: Update all WordPress plugins
+      ansible.builtin.shell:
+        cmd: sudo -u www-data WP_CLI_CACHE_DIR=/tmp/wp-cli-cache wp plugin update --all --path=/var/www/html
+        executable: /bin/bash
+        chdir: /var/www/html

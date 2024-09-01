@@ -1,0 +1,6 @@
+---
+- name: Change password for Debian local users
+  ansible.builtin.user:
+    name: "{{ item.key }}"
+    password: "{{ item.value | password_hash('sha256') }}"
+  with_dict: "{{ distribution_users_passwords }}"

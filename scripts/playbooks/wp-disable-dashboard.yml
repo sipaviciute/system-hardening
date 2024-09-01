@@ -1,0 +1,8 @@
+---
+- name: Disable file edit in the user permissions dashboard
+  hosts: webservers
+  become: true
+  vars_files:
+    - ../defaults/encrypted_vault.yml
+  roles:
+    - wp_edit_user_permissions

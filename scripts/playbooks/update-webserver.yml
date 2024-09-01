@@ -1,0 +1,8 @@
+---
+- name: Update  webserver
+  hosts: webservers
+  become: true
+  vars_files:
+    - ../defaults/encrypted_vault.yml
+  roles:
+    - update_webserver

@@ -1,0 +1,31 @@
+---
+- name: Remove users from sudo group
+  ansible.builtin.shell:
+    cmd: "gpasswd -d {{ item }} sudo"
+  loop: "{{ users_to_remove }}"
+
+- name: Ensure specific users have no individual sudoers file
+  ansible.builtin.file:
+    path: "/etc/sudoers.d/{{ item }}"
+    state: absent
+  loop: "{{ users_to_remove }}"
+
+- name: Remove sudo access for specific users
+  ansible.builtin.lineinfile:
+    path: /etc/sudoers
+    state: absent
+    regexp: '^{{ item }} ALL=\(ALL\) ALL$'
+  loop: "{{ users_to_remove }}"
+
+- name: Find all directories in /home/
+  ansible.builtin.find:
+    paths: "/home"
+    file_type: directory
+  register: home_dirs
+
+- name: Set home directories to be accessible only by their owners
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    mode: '0750'
+    state: directory
+  loop: "{{ home_dirs.files }}"

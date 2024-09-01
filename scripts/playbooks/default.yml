@@ -1,0 +1,71 @@
+---
+- name: Apply all roles
+  hosts: all
+  become: true
+  vars_files:
+    - ../defaults/encrypted_vault.yml
+
+  tasks:
+    - name: Update database
+      ansible.builtin.include_role:
+        name: update_database
+      when: "'databases' in group_names"
+
+    - name: Update webserver
+      ansible.builtin.include_role:
+        name: update_webserver
+      when: "'webservers' in group_names"
+
+    - name: Secure webserver
+      ansible.builtin.include_role:
+        name: secure_distro
+      when: "'webservers' in group_names"
+
+    - name: Harden database passwords
+      ansible.builtin.include_role:
+        name: harden_database_users
+      when: "'databases' in group_names"
+
+    - name: Harden webserver user passwords
+      ansible.builtin.include_role:
+        name: harden_user_passwords
+      when: "'webservers' in group_names"
+
+    - name: Harden WordPress login
+      ansible.builtin.include_role:
+        name: wp_login_hardening
+      when: "'webservers' in group_names"
+
+    - name: Disable WordPress dashboard
+      ansible.builtin.include_role:
+        name: wp_disable_dashboard
+      when: "'webservers' in group_names"
+
+    - name: Harden Nginx
+      ansible.builtin.include_role:
+        name: harden_nginx
+      when: "'webservers' in group_names"
+
+    - name: Remove metadata
+      ansible.builtin.include_role:
+        name: remove_metadata
+      when: "'webservers' in group_names"
+
+    - name: Limit WordPress roles
+      ansible.builtin.include_role:
+        name: wp_limit_roles
+      when: "'webservers' in group_names"
+
+    - name: Enable ModSecurity
+      ansible.builtin.include_role:
+        name: enable_modsecurity
+      when: "'webservers' in group_names"
+
+    - name: Configure reports
+      ansible.builtin.include_role:
+        name: configure_reports
+      when: "'webservers' in group_names"
+
+    - name: Deploy backup
+      ansible.builtin.include_role:
+        name: backup_deploy

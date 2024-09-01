@@ -1,0 +1,41 @@
+---
+- name: Install required packages
+  ansible.builtin.apt:
+    name:
+      - postfix
+      - mailutils
+      - logcheck
+      - rsyslog
+    state: present
+
+- name: Update rsyslog configuration for mail logging
+  ansible.builtin.lineinfile:
+    path: /etc/rsyslog.conf
+    insertafter: '^module\(load="imklog"\)   # provides kernel logging support'
+    line: 'mail.*                  -/var/log/mail.log'
+  notify: Restart rsyslog
+
+- name: Ensure symbolic link for sendmail
+  ansible.builtin.file:
+    src: /usr/sbin/sendmail
+    dest: /usr/bin/sendmail
+    state: link
+
+- name: Configure logcheck to send emails to specified user
+  ansible.builtin.lineinfile:
+    path: /etc/logcheck/logcheck.conf
+    regexp: '^SENDMAILTO=".*"'
+    line: 'SENDMAILTO="{{ recipient_email }}"'
+
+- name: Ensure additional log files are monitored by logcheck
+  ansible.builtin.lineinfile:
+    path: /etc/logcheck/logcheck.logfiles
+    line: '/var/log/modsec_audit.log'
+
+- name: Update logcheck cron job timing
+  ansible.builtin.lineinfile:
+    path: /etc/cron.d/logcheck
+    regexp: '^\s*2 \* \* \* \*.*logcheck.*$'
+    line: '0 8 * * *       logcheck    if [ -x /usr/sbin/logcheck ]; then nice -n10 /usr/sbin/logcheck; fi'
+    backrefs: true
+  notify: Restart cron
