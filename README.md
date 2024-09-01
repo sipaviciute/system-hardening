@@ -41,3 +41,8 @@ Automated tasks list:
 10. Enable the Directory Index Protection, preventing directory index listings and defaulting, deny any request not using POST, REQUEST. Deny any badly formed HTTP PROTOCOL in requests.
 
 11. Create a backup of the system in the backup server.
+
+## This repository:
+
+1. /environment - Bash scripts of installing what is needed for the system to work
+2. /scripts - Ansible scripts for 'Automated tasks list' mentioned above
